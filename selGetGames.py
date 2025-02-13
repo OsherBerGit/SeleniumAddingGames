@@ -1,42 +1,26 @@
-# /opt/anaconda3/bin/python sel.py
-# Import statements
-from selenium import webdriver  # Main Se
-
-# lenium package for browser automation
-# Manages ChromeDriver service
+from selenium import webdriver  
 from selenium.webdriver.chrome.service import Service
-
-# Chrome-specific configuration options
 from selenium.webdriver.chrome.options import Options
-
-# Provides locator strategies (ID, CLASS, etc.)
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait  # Implements explicit waits
-
-# Conditions for WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import time  # For adding delays between actions
-# Function to set up the Chrome WebDriver
-
+import time
 import pandas as pd
 
 def setup_driver():
-    chrome_options = Options()  # Create a new Options object for Chrome
-    service = Service()  # Create a new Service object to manage ChromeDriver
-    # Initialize Chrome with our settings
+    chrome_options = Options()
+    service = Service()
     return webdriver.Chrome(service=service, options=chrome_options)
 
-
 def interact_with_form():
-    driver = setup_driver()  # Create a new browser instance
+    driver = setup_driver()
 
     try:
         df = pd.read_excel('games.xlsx', engine='openpyxl')
-        df = pd.read_excel('file.xlsx', usecols=['Column1', 'Column2'], engine='openpyxl')
-        # Open the website
-        # Navigate to the specified URL
-        driver.get("http://127.0.0.1:5500/frontend/index.html")
-        # time.sleep(2)  # Pause for 2 seconds to let the page load
+        df = pd.read_excel('games.xlsx', usecols=['Name', 'Genre', 'Price'], engine='openpyxl')
+        
+        driver.get("https://store.steampowered.com/")
+        # time.sleep(2)
 
         # Create a wait object with 10-second timeout
         wait = WebDriverWait(driver, 10)
@@ -74,7 +58,6 @@ def interact_with_form():
 
     finally:
         driver.quit()  # Close the browser, regardless of success or failure
-
 
 # Script entry point
 # Only run if this file is run directly (not imported)
