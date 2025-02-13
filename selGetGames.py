@@ -17,7 +17,7 @@ def interact_with_form():
 
     try:
         df = pd.read_excel('games.xlsx', engine='openpyxl')
-        df = pd.read_excel('games.xlsx', usecols=['Name', 'Genre', 'Price'], engine='openpyxl')
+        df = pd.read_excel('games.xlsx', usecols=['Name', 'Genre', 'Price', 'img_url'], engine='openpyxl')
         
         driver.get("https://store.steampowered.com/")
         # time.sleep(2)
