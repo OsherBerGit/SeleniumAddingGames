@@ -46,17 +46,21 @@ def interact_with_form():
         password_field.send_keys("123")
         
         
-        title_field = wait.until(EC.presence_of_element_located((By.ID, "userName"))) # Handle the game name field
-        genre_field = driver.find_element(By.ID, "userEmail") # Handle the game genre field
+        name_field = wait.until(EC.presence_of_element_located((By.ID, "game-title"))) # Handle the game name field
+        genre_field = driver.find_element(By.ID, "game-genre") # Handle the game genre field
+        price_field = driver.find_element(By.ID, "game-price") # Handle the game price field
+        
         # Handle form submission
         addGame_button = driver.find_element(By.ID, "submit")  # Find submit button
         driver.execute_script("arguments[0].scrollIntoView(true);", addGame_button) # Scroll to make button visible
         
         while (False): # While there are still sheets left in the excel game file
             # Gets the fields from the excel
-            title_field.send_keys("John") #
+            name_field.send_keys("John") #
             time.sleep(1)
             genre_field.send_keys("john")
+            time.sleep(1)
+            price_field.send_keys("john")
             time.sleep(1)
             addGame_button.click()
         
