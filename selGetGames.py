@@ -16,79 +16,47 @@ def interact_with_form():
     driver = setup_driver()
 
     try:
-        df = pd.read_excel('games.xlsx', engine='openpyxl')
-        df = pd.read_excel('games.xlsx', usecols=['Name', 'Genre', 'Price', 'img_url'], engine='openpyxl')
-        
         driver.get("https://store.steampowered.com/")
-        # time.sleep(2)
+        time.sleep(5)
 
-        # Create a wait object with 10-second timeout
         wait = WebDriverWait(driver, 10)
         
+        topSellers = driver.find_element(By.CLASS_NAME, "tab_content")
+        driver.execute_script("arguments[0].scrollIntoView(true);", topSellers)
         
-        games = driver.find_elements(By.CLASS_NAME, "tab_item")
         data = []
+        game_links = topSellers.find_elements(By.TAG_NAME, "a")
         
-        for game in games[:10]:
+        for i, game in enumerate(game_links[:3]):  # חפש 3 משחקים בלבד
+            game_link = game.get_attribute("href")
+
+            if not game_link:
+                continue
+
+            driver.get(game_link)  # עבור לדף המשחק
+            time.sleep(2)
+
             try:
-                name = game.find_element(By.CLASS_NAME, "tab_item_name").text
-                genre = game.find_element(By.CLASS_NAME, "tab_item_top_tags").text
-                price = game.find_element(By.CLASS_NAME, "discount_final_price").text
-                img_url = game.find_element(By.TAG_NAME, "img").get_attribute("src")
+                name = driver.find_element(By.ID, "appHubAppName").text
+                author = driver.find_element(By.ID, "developers_list").text
+                release_date = driver.find_element(By.CLASS_NAME, "date").text
+                genre = driver.find_element(By.CLASS_NAME, "app_tag").text
+                price = driver.find_element(By.CLASS_NAME, "game_purchase_price").text
+                img_url = driver.find_element(By.CLASS_NAME, "game_header_image_full").get_attribute("src")
 
-                game_link = game.get_attribute("href")
-                driver.execute_script(f"window.open('{game_link}', '_blank');")
-                driver.switch_to.window(driver.window_handles[1])
-                time.sleep(2)
+                data.append([name, author, release_date, genre, price, img_url])
 
-                try:
-                    author = driver.find_element(By.XPATH, "//div[@id='developers_list']").text
-                except:
-                    author = "Unknown"
-
-                try:
-                    release_date = driver.find_element(By.XPATH, "//div[@class='release_date']//div[@class='date']").text
-                except:
-                    release_date = ""
-
-                driver.close()
-                driver.switch_to.window(driver.window_handles[0])
-
-                data.append([name, genre, price, author, release_date, img_url])
             except Exception as e:
-                print(f"Error scraping a game: {e}")
+                print(f"Error scraping game {i+1}: {str(e)}")
 
-        # שמירת הנתונים ל-Excel
-        df = pd.DataFrame(data, columns=["Name", "Genre", "Price", "Author", "Release Date", "Image URL"])
-        df.to_excel("steam_games.xlsx", index=False, engine="openpyxl")
-        
-         # Handle form submission
-        addGame_button = driver.find_element(By.ID, "submit")  # Find submit button
+            driver.back()
+            time.sleep(2)
 
-        # Handle the name field
-        title_field = wait.until(EC.presence_of_element_located((By.ID, "userName")))  # Wait until name field is present
-        title_field.send_keys("John")  # Type "John"
-        time.sleep(1)  # Wait 1 second
-
-        # Handle the email field
-        genre_field = driver.find_element(By.ID, "userEmail")  # Find email input field
-        genre_field.send_keys("john")  # Type first part
-        time.sleep(1)
-
-        # Handle current address field
-        price_field = driver.find_element(By.ID, "currentAddress")  # Find address input
-        price_field.send_keys("123 Main Street")  # Type street
-        time.sleep(1)
-
-        # Scroll to make button visible
-        driver.execute_script("arguments[0].scrollIntoView(true);", addGame_button)
-        time.sleep(1)  # Wait after scrolling
-        addGame_button.click()  # Click the submit button
-
-        time.sleep(3)  # Wait to see the results
-
-        # Wait for user input before closing
-        input("Press Enter to close the browser...")
+        df = pd.DataFrame(data, columns=['Name', 'Author', 'Release Date', 'Genre', 'Price', 'img_url'])
+        df.to_excel("games.xlsx", index=False, engine="openpyxl")
+            
+        for i in data:
+            print(i)
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")  # Print any errors that occur
